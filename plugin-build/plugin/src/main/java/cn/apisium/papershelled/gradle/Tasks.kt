@@ -95,7 +95,7 @@ abstract class GenerateMappedJarTask : DefaultTask() {
         try {
             val path = URLClassLoader(arrayOf(jarFile.get().asFile.toURI().toURL())).use {
                 val clipClazz = it.loadClass("io.papermc.paperclip.Paperclip")
-                val ctxClazz = it.loadClass("io.papermc.paperclip.DownloadContext")
+                it.loadClass("io.papermc.paperclip.DownloadContext")
                 val repoDir = Path.of(System.getProperty("bundlerRepoDir", ""))
                 val patches = clipClazz.getDeclaredMethod("findPatches").run {
                     isAccessible = true
@@ -125,7 +125,7 @@ abstract class GenerateMappedJarTask : DefaultTask() {
                     invoke(null, baseFile, patches, repoDir) as Map<String, Map<String, URL>>
                 }
             }
-            val paperDict = path["versions"];
+            val paperDict = path["versions"]
             require(paperDict != null) {
                 "Server jar output directory was not found."
             }
@@ -184,8 +184,15 @@ abstract class GenerateMappedJarTask : DefaultTask() {
             allOther.values.map { it.toURI().toPath() }.forEach {
                 it.copyTo(libFolder.resolve(it.fileName))
             }
-        } catch (unused: UnsupportedClassVersionError) { legacy(reobf)
-        } catch (it: NoSuchMethodException) { it.printStackTrace();legacy(reobf) }
+        } catch (unused: UnsupportedClassVersionError) {
+            legacy(reobf)
+        } catch (it: NoSuchMethodException) {
+            it.printStackTrace()
+            legacy(reobf)
+        } catch (it: ClassNotFoundException) {
+            it.printStackTrace()
+            legacy(reobf)
+        }
     }
 
     private fun legacy(reobf: Path) {
