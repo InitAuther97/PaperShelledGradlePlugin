@@ -37,5 +37,7 @@ abstract class Extension @Inject constructor(private val project: Project) {
 
     @Suppress("unused")
     fun jar(): ConfigurableFileCollection = project.files(paperShelledJar.get().asFile)
-    fun lib(): ConfigurableFileTree = project.fileTree(paperShelledLib.get().asFile)
+    fun lib(): ConfigurableFileTree = project.fileTree(paperShelledLib.get().asFile) {
+        it.include("*.jar")
+    }
 }
